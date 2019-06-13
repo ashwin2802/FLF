@@ -1,8 +1,11 @@
 // Motor A
  
 int enA = 9;
-int in1 = 8;
-int in2 = 7;
+int in1 = 7;
+int in2 = 8;
+int enB = 5;
+int inB1 = 3;
+int inB2 = 4;
  
 void setup()
  
@@ -13,6 +16,9 @@ void setup()
   pinMode(enA, OUTPUT);
   pinMode(in1, OUTPUT);
   pinMode(in2, OUTPUT);
+  pinMode(enB, OUTPUT);
+  pinMode(inB1, OUTPUT);
+  pinMode(inB2, OUTPUT);
 
   Serial.begin(9600);
   Serial.println("Motor Test");
@@ -29,24 +35,32 @@ void demoOne()
  
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
+  digitalWrite(inB1, LOW);
+  digitalWrite(inB2, HIGH);
  
   // Set speed to 200 out of possible range 0~255
  
   analogWrite(enA, 250);
+  analogWrite(enB, 250);
  
-  delay(2000);
+  //delay(2000);
  
   // Now change motor directions
  
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, HIGH);  
+  //digitalWrite(in1, LOW);
+  //digitalWrite(in2, HIGH);  
+  //digitalWrite(inB1, HIGH);
+  //digitalWrite(inB2, LOW);  
  
-  delay(2000);
+  //delay(2000);
  
   // Now turn off motors
  
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, LOW);  
+  //digitalWrite(in1, LOW);
+  //digitalWrite(in2, LOW); 
+    //digitalWrite(inB1, LOW);
+  //digitalWrite(inB2, LOW);
+   
 
 }
  
@@ -61,6 +75,8 @@ void demoTwo()
  
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);  
+    digitalWrite(inB1, HIGH);
+  digitalWrite(inB2, LOW);  
 
   // Accelerate from zero to maximum speed
  
@@ -69,6 +85,7 @@ void demoTwo()
   {
  
     analogWrite(enA, i);
+    analogWrite(enB, i);
     
     delay(20);
  
@@ -81,7 +98,7 @@ void demoTwo()
   {
  
     analogWrite(enA, i);
- 
+    analogWrite(enB, i);
     delay(20);
  
   } 
@@ -90,6 +107,9 @@ void demoTwo()
  
   digitalWrite(in1, LOW);
   digitalWrite(in2, LOW);   
+   
+  digitalWrite(inB1, LOW);
+  digitalWrite(inB2, LOW); 
 }
  
 void loop()
@@ -98,10 +118,10 @@ void loop()
  
   demoOne();
  
-  delay(1000);
+  //delay(1000);
  
-  demoTwo();
+  //demoTwo();
  
-  delay(1000);
+  //delay(1000);
  
 }

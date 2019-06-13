@@ -46,13 +46,13 @@ void setup()
 
 void loop()
 {
-  digitalWrite(in0PinA, HIGH);
-  digitalWrite(in0PinB, LOW);
-  analogWrite(en0, 4);
+  digitalWrite(in0PinA, LOW);
+  digitalWrite(in0PinB, HIGH);
+  analogWrite(en0, 250);
 
-  digitalWrite(in1PinA, HIGH);
-  digitalWrite(in1PinB, LOW);
-  analogWrite(en1, 255);
+  digitalWrite(in1PinA, LOW);
+  digitalWrite(in1PinB, HIGH);
+  analogWrite(en1, 250);
   
   newpositionA = encoder0Pos;
   newpositionB = encoder1Pos;

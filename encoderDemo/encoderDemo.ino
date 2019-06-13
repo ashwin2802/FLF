@@ -4,15 +4,15 @@
 //   Low Performance:  neither pin has interrupt capability
 
 int enA = 9;
-int inA1 = 8;
-int inA2 = 7;
-int enB = 3;
-int inB1 = 4;
-int inB2 = 5;
-int encA1 = 20;
-int encA2 = 21;
-int encB1 = 18;
-int encB2 = 19;
+int inA1 = 7;
+int inA2 = 8;
+int enB = 5;
+int inB1 = 3;
+int inB2 = 4;
+int encA1 = 18;
+int encA2 = 19;
+int encB1 = 20;
+int encB2 = 21;
 
 int counterA = 0;
 int counterB = 0;
@@ -43,13 +43,13 @@ void setup() {
 
 void loop() {
   
-  digitalWrite(inA1, LOW);
-  digitalWrite(inA2, HIGH);
-  analogWrite(enA, 200);
+  digitalWrite(inA1, HIGH);
+  digitalWrite(inA2, LOW);
+  analogWrite(enA, 250);
 
-//  digitalWrite(inB1, LOW);
-//  digitalWrite(inB2, HIGH);
-//  analogWrite(enB, 200);
+  digitalWrite(inB1, LOW);
+  digitalWrite(inB2, HIGH);
+  analogWrite(enB, 250);
   
   if (aState != aLastState)
   {
@@ -61,8 +61,8 @@ void loop() {
     {
       counterA--;
     }
-//    Serial.print("Position, Motor 1: ");
-//    Serial.println(counterA);
+    Serial.print("Position, Motor 1: ");
+    Serial.println(counterA);
   }
 
   aLastState = aState;
@@ -77,20 +77,18 @@ void loop() {
     {
       counterB--;
     }
-//    Serial.print("Position, Motor 2: ");
-//    Serial.println(counterB);
+    Serial.print("Position, Motor 2: ");
+    Serial.println(counterB);
   }
   bLastState = bState;
   
    Serial.print("motor1, pin1 = ");
    Serial.println(digitalRead(encA1));
-//   Serial.print("motor1, pin2 = ");
-//   Serial.println(digitalRead(encA2));
-
-//   delay(250);
+   Serial.print("motor1, pin2 = ");
+   Serial.println(digitalRead(encA2));
    
-//   Serial.print("motor2, pin1 = ");
-//   Serial.println(digitalRead(encB1));
-//   Serial.print("motor2, pin2 = ");
-//   Serial.println(digitalRead(encB2));
+   Serial.print("motor2, pin1 = ");
+   Serial.println(digitalRead(encB1));
+   Serial.print("motor2, pin2 = ");
+   Serial.println(digitalRead(encB2));
 }
