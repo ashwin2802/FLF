@@ -118,10 +118,10 @@ void loop()
  
   demoOne();
  
-  //delay(1000);
+  delay(1000);
  
-  //demoTwo();
+  demoTwo();
  
-  //delay(1000);
+  delay(1000);
  
 }
