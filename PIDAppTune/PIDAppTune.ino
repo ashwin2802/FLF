@@ -166,6 +166,21 @@ float rightMotorSpeed = 0, leftMotorSpeed = 0;
 void loop() {
   value = readBackLine();
   type = value % 100;
+
+  gain_val = BTserial.readStringUntil('*');
+  string_val = gain_val.toFloat();
+  if(gain_val == 'p')
+  {
+    Kp = string_val;
+  }
+  else if(gain_val == 'i')
+  {
+    Ki = string_val;
+  }
+  else if(gain_val == 'd')
+  {
+    Kd == string_val;
+  }
   
 //  if(type == 0)
 //  {
