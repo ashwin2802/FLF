@@ -1,5 +1,5 @@
 #include <SoftwareSerial.h>
-#define minBlackVal 500
+#define minBlackVal 400
 
 #define rightMotor1 3
 #define led 13
@@ -12,19 +12,21 @@
 
 SoftwareSerial BTserial(10,11);
 unsigned int values[64] = {0, 5001, 4001, 4502, 3001, 4003, 3502, 4007, 2001, 3504, 3003, 4510, 2502, 2510, 3007, 3513, 1001, 3005, 2504, 4511, 2003, 3008, 3510, 4014, 1502, 1511, 1510, 3018, 2007, 2014, 2513, 3019, 1, 2506, 2005, 4512, 1504, 4009, 3511, 4015, 1003, 1009, 2008, 4516, 2510, 2516, 3014, 3520, 502, 512, 511, 2517, 510, 516, 2018, 4021, 1007, 1015, 1014, 3021, 1513, 1520, 2019, 2522};
-float gains[len] = {0,0,0};
+// kP = -0.79, kD = -0.73, kI = 0.37
+float gains[len] = {-0.79,-0.73,0.37};
 float dgains[len] = {1,1,1};
-float tol = 0.002, step_ = 0.1;
+float tol = 0.002, step_ = 0.001;
 
 //float rightMaxSpeed = 250;
 //float leftMaxSpeed = 250;
-//float rightBaseSpeed = 80;
-//float leftBaseSpeed = 80;
+float rightBaseSpeed = 250;
+float leftBaseSpeed = 215;
 
 float maxSpeed = 250;
-float baseSpeed = 80;
+float baseSpeed = 250;
 
-int pos_ = 0, type = 0, value = 0;
+int pos_ = 0, type = 0, value = 0, delta = 0;
+float deltaR = 0;
 float error = 0, lastError = 0, bestError = 0, sumError = 0;
 float motorSpeed = 0;
 float rightMotorSpeed = 0, leftMotorSpeed = 0;
@@ -111,28 +113,32 @@ float run()
   type = value % 100;
 
   pos_ = value - type;
-  error = (pos_ - 2500.0)/2500.0;
-  motorSpeed = (gains[0]*abs(error) + gains[1]*(abs(error)-lastError) + gains[2]*sumError)*baseSpeed;
-  sumError += abs(error);
-  lastError = abs(error);
+  delta = (pos_ - 2500.0);
+  deltaR = delta / 2500.0;
+  
+  error = (gains[0]*abs(deltaR) + gains[1]*(abs(deltaR)-lastError) + 0*gains[2]*sumError);
+  sumError += abs(deltaR);
+  lastError = abs(deltaR);
+  motorSpeed = error*baseSpeed;
 
-  if(error < 0){
-    rightMotorSpeed = baseSpeed;
-    leftMotorSpeed = motorSpeed;
+  if(delta < 0){
+    rightMotorSpeed = rightBaseSpeed;
+    leftMotorSpeed = leftBaseSpeed - error*leftBaseSpeed;
   }
-  else if(error == 0){
-    rightMotorSpeed = leftMotorSpeed = baseSpeed;
+  else if(delta == 0){
+    rightMotorSpeed = rightBaseSpeed;
+    leftMotorSpeed = leftBaseSpeed;
   }
-  else{
-    rightMotorSpeed = baseSpeed;
-    leftMotorSpeed = motorSpeed;
+  else if(delta > 0){
+    leftMotorSpeed = leftBaseSpeed;
+    rightMotorSpeed = rightBaseSpeed - error*rightBaseSpeed;
   }
   
 //  rightMotorSpeed = rightBaseSpeed + motorSpeed;
 //  leftMotorSpeed = leftBaseSpeed - motorSpeed;
 
-  if(rightMotorSpeed > rightMaxSpeed) rightMotorSpeed = maxSpeed;
-  if(leftMotorSpeed > leftMaxSpeed) leftMotorSpeed = maxSpeed;
+  if(rightMotorSpeed > maxSpeed) rightMotorSpeed = maxSpeed;
+  if(leftMotorSpeed > maxSpeed) leftMotorSpeed = maxSpeed;
   if(rightMotorSpeed < 0) rightMotorSpeed = 0;
   if(leftMotorSpeed < 0) leftMotorSpeed = 0;
 
@@ -146,7 +152,7 @@ float run()
     BTserial.println(";");
 //  }
 
-  if(error == 0){
+  if(delta == 0){
     digitalWrite(rightMotor1, HIGH);
     digitalWrite(rightMotor2, LOW);
     analogWrite(rightMotorEn, rightMotorSpeed);
@@ -155,7 +161,7 @@ float run()
     digitalWrite(leftMotor2, LOW);
     analogWrite(leftMotorEn, leftMotorSpeed);
   }
-  else if(error < 0){
+  else if(delta < 0){
     digitalWrite(rightMotor1, HIGH);
     digitalWrite(rightMotor2, LOW);
     analogWrite(rightMotorEn, rightMotorSpeed);
@@ -164,7 +170,7 @@ float run()
     digitalWrite(leftMotor2, HIGH);
     analogWrite(leftMotorEn, leftMotorSpeed);
   }
-  else{
+  else if(delta > 0){
     digitalWrite(rightMotor1, LOW);
     digitalWrite(rightMotor2, HIGH);
     analogWrite(rightMotorEn, rightMotorSpeed);
@@ -174,7 +180,7 @@ float run()
     analogWrite(leftMotorEn, leftMotorSpeed);
   }
 
-  return motorSpeed;
+  return error;
 }
 
 void tune(){
@@ -240,6 +246,7 @@ void setup() {
   BTserial.print("\t");
   BTserial.print(bestError);
   BTserial.println(";");
+  delay(5000);
 }
 
 void loop() {
