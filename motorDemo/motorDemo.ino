@@ -35,8 +35,8 @@ void demoOne()
  
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
-  digitalWrite(inB1, LOW);
-  digitalWrite(inB2, HIGH);
+  digitalWrite(inB1, HIGH);
+  digitalWrite(inB2, LOW);
  
   // Set speed to 200 out of possible range 0~255
  
@@ -73,8 +73,8 @@ void demoTwo()
  
   // Turn on motors
  
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, HIGH);  
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);  
     digitalWrite(inB1, HIGH);
   digitalWrite(inB2, LOW);  
 

@@ -30,8 +30,8 @@ void loop() {
   else E='W';
   if(f>500) F='B';
   else F='W';
-  Serial.write(A);
-  Serial.write(B);
+  Serial.print(A);
+  Serial.println(B);
   Serial.write(C);
   Serial.write(D);
   Serial.write(E);
