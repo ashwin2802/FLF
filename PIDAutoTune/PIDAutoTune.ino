@@ -1,5 +1,6 @@
 #include <SoftwareSerial.h>
-#define minBlackVal 400
+#define minBlackVal 500
+#define minFrontBlackVal 700
 
 #define rightMotor1 3
 #define led 13
@@ -19,13 +20,14 @@ float tol = 0.002, step_ = 0.001;
 
 //float rightMaxSpeed = 250;
 //float leftMaxSpeed = 250;
-float rightBaseSpeed = 250;
-float leftBaseSpeed = 215;
+float rightBaseSpeed = 180;
+float leftBaseSpeed = 154;
 
 float maxSpeed = 250;
 float baseSpeed = 250;
 
-int pos_ = 0, type = 0, value = 0, delta = 0;
+int pos_ = 0, type = 0, backValue = 0, delta = 0;
+int frontValue = 0, frontType = 0, frontPos = 0;
 float deltaR = 0;
 float error = 0, lastError = 0, bestError = 0, sumError = 0;
 float motorSpeed = 0;
@@ -74,45 +76,118 @@ int readBackLine(){
   if(count % 20 == 0)
   { 
     count = 0;
-//  Serial.print(sensors[5]);
+
   BTserial.println("back");
+//  BTserial.print(sensors[5]);
   BTserial.print((sensors[5]>minBlackVal)?"B":"W");
   BTserial.print("\t");
   
-//  Serial.print(sensors[4]);
+//  BTserial.print(sensors[4]);
   BTserial.print((sensors[4]>minBlackVal)?"B":"W");
   BTserial.print("\t");
  
-//  Serial.print(sensors[3]);
+//  BTserial.print(sensors[3]);
   BTserial.print((sensors[3]>minBlackVal)?"B":"W");
   BTserial.print("\t");
   
-//  Serial.print(sensors[2]);
+//  BTserial.print(sensors[2]);
   BTserial.print((sensors[2]>minBlackVal)?"B":"W");
   BTserial.print("\t");
 
-//  Serial.print(sensors[1]);
+//  BTserial.print(sensors[1]);
   BTserial.print((sensors[1]>minBlackVal)?"B":"W");
   BTserial.print("\t");
     
-//  Serial.print(sensors[0]);
+//  BTserial.print(sensors[0]);
   BTserial.print((sensors[0]>minBlackVal)?"B":"W");
   BTserial.print("\t");
   
   BTserial.println(";");
   }
-//  Serial.print(reading);
-//  Serial.print(";");
+//  BTserial.print(reading);
+//  BTserial.println(";");
 
   return values[reading];
 }
 
+int readFrontLine(){
+  
+  unsigned int sensors[6];
+  int reading = 0; 
+  
+  sensors[0] = analogRead(A0);
+  sensors[1] = analogRead(A1);
+  sensors[2] = analogRead(A2);
+  sensors[3] = analogRead(A3);
+  sensors[4] = analogRead(A4);
+  sensors[5] = analogRead(A5);
+
+  for(int i=0; i<6; i++)
+  {
+    int bit_;
+    if(sensors[i] > minFrontBlackVal)
+      bit_ = 1;
+    else bit_ = 0;
+    reading += bit_ * power(2, i);  
+  }
+  count = count + 1;
+
+//  if(count % 20 == 0)
+//  { 
+//    count = 0;
+
+//  BTserial.println("front");
+//  BTserial.print(sensors[5]);
+//  BTserial.print((sensors[5]>minBlackVal)?"B":"W");
+//  BTserial.print("\t");
+  
+//  BTserial.print(sensors[4]);
+//  BTserial.print((sensors[4]>minBlackVal)?"B":"W");
+//  BTserial.print("\t");
+ 
+//  BTserial.print(sensors[3]);
+//  BTserial.print((sensors[3]>minBlackVal)?"B":"W");
+//  BTserial.print("\t");
+  
+//  BTserial.print(sensors[2]);
+//  BTserial.print((sensors[2]>minBlackVal)?"B":"W");
+//  BTserial.print("\t");
+
+//  BTserial.print(sensors[1]);
+//  BTserial.print((sensors[1]>minBlackVal)?"B":"W");
+//  BTserial.print("\t");
+    
+//  BTserial.print(sensors[0]);
+//  BTserial.print((sensors[0]>minBlackVal)?"B":"W");
+//  BTserial.print("\t");
+  
+//  BTserial.println(";");
+//  }
+//  BTserial.print(reading);
+//  BTserial.println(";");
+
+  return values[reading];
+}
+
+void leftTurn()
+{
+    digitalWrite(rightMotor1, HIGH);
+    digitalWrite(rightMotor2, LOW);
+    analogWrite(rightMotorEn, rightBaseSpeed);
+
+    digitalWrite(leftMotor1, LOW);
+    digitalWrite(leftMotor2, HIGH);
+    analogWrite(leftMotorEn, leftBaseSpeed);
+    return;
+}
+
 float run()
 {
-  value = readBackLine();
-  type = value % 100;
+  frontValue = readFrontLine();
+  backValue = readBackLine();
+  type = backValue % 100;
 
-  pos_ = value - type;
+  pos_ = backValue - type;
   delta = (pos_ - 2500.0);
   deltaR = delta / 2500.0;
   
@@ -134,6 +209,7 @@ float run()
     rightMotorSpeed = rightBaseSpeed - error*rightBaseSpeed;
   }
   
+  
 //  rightMotorSpeed = rightBaseSpeed + motorSpeed;
 //  leftMotorSpeed = leftBaseSpeed - motorSpeed;
 
@@ -143,41 +219,58 @@ float run()
   if(leftMotorSpeed < 0) leftMotorSpeed = 0;
 
 //  if(count % 20 == 0){
-    count = 0;
-    BTserial.print(error);
-    BTserial.print("\t");
-    BTserial.print(rightMotorSpeed);  
-    BTserial.print("\t");
-    BTserial.print(leftMotorSpeed);
-    BTserial.println(";");
+//    count = 0;
+//    BTserial.print(error);
+//    BTserial.print("\t");
+//    BTserial.print(rightMotorSpeed);  
+//    BTserial.print("\t");
+//    BTserial.print(leftMotorSpeed);
+//    BTserial.println(";");
 //  }
 
-  if(delta == 0){
-    digitalWrite(rightMotor1, HIGH);
-    digitalWrite(rightMotor2, LOW);
-    analogWrite(rightMotorEn, rightMotorSpeed);
+   if(frontValue == 0 && (backValue == 2502 || backValue == 3001 || backValue == 2001))
+   {
+    do{
+      leftTurn(); 
+    }while(backValue != 2502 && backValue != 3001 && backValue != 2001);
+   }
+   if(backValue == 2522)
+   {
+      do
+      {
+        leftTurn(); 
+        backValue = readBackLine();
+      }while(backValue != 2502 && backValue != 3001 && backValue != 2001);
+   }
+   else
+   {
+    if(delta == 0){
+      digitalWrite(rightMotor1, HIGH);
+      digitalWrite(rightMotor2, LOW);
+      analogWrite(rightMotorEn, rightMotorSpeed);
 
-    digitalWrite(leftMotor1, HIGH);
-    digitalWrite(leftMotor2, LOW);
-    analogWrite(leftMotorEn, leftMotorSpeed);
-  }
-  else if(delta < 0){
-    digitalWrite(rightMotor1, HIGH);
-    digitalWrite(rightMotor2, LOW);
-    analogWrite(rightMotorEn, rightMotorSpeed);
+      digitalWrite(leftMotor1, HIGH);
+      digitalWrite(leftMotor2, LOW);
+      analogWrite(leftMotorEn, leftMotorSpeed);
+    }
+    else if(delta < 0){
+      digitalWrite(rightMotor1, HIGH);
+      digitalWrite(rightMotor2, LOW);
+      analogWrite(rightMotorEn, rightMotorSpeed);
 
-    digitalWrite(leftMotor1, LOW);
-    digitalWrite(leftMotor2, HIGH);
-    analogWrite(leftMotorEn, leftMotorSpeed);
-  }
-  else if(delta > 0){
-    digitalWrite(rightMotor1, LOW);
-    digitalWrite(rightMotor2, HIGH);
-    analogWrite(rightMotorEn, rightMotorSpeed);
+      digitalWrite(leftMotor1, LOW);
+      digitalWrite(leftMotor2, HIGH);
+      analogWrite(leftMotorEn, leftMotorSpeed);
+    }
+    else if(delta > 0){
+      digitalWrite(rightMotor1, LOW);
+      digitalWrite(rightMotor2, HIGH);
+      analogWrite(rightMotorEn, rightMotorSpeed);
 
-    digitalWrite(leftMotor1, HIGH);
-    digitalWrite(leftMotor2, LOW);
-    analogWrite(leftMotorEn, leftMotorSpeed);
+      digitalWrite(leftMotor1, HIGH);
+      digitalWrite(leftMotor2, LOW);
+      analogWrite(leftMotorEn, leftMotorSpeed);
+    }
   }
 
   return error;
@@ -234,26 +327,26 @@ void setup() {
   pinMode(led, OUTPUT);
 
   BTserial.begin(9600);
-  delay(5000);
+//  delay(5000);
   BTserial.println("tuning start");
   digitalWrite(led, HIGH);
-  tune();
+//  tune();
   digitalWrite(led, LOW);
   BTserial.println("tuning over");
   BTserial.print(gains[0]);  
   BTserial.print("\t");
   BTserial.print(gains[1]);
   BTserial.print("\t");
+  BTserial.print(gains[2]);
+  BTserial.print("\t");
   BTserial.print(bestError);
   BTserial.println(";");
-  delay(5000);
+  delay(3000);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  error = run();
-  if(count % 20 == 1){
-    BTserial.print(error);
-    BTserial.println(";");
-  }
+  error = run(); 
+//  BTserial.print(error);
+//  BTserial.println(";"); 
 }
