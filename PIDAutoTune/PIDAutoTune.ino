@@ -13,10 +13,11 @@
 
 SoftwareSerial BTserial(10,11);
 unsigned int values[64] = {0, 5001, 4001, 4502, 2501, 4003, 3502, 4007, 2501, 3504, 3003, 4510, 2502, 2510, 3007, 3513, 1001, 3005, 2504, 4511, 2003, 3008, 3510, 4014, 1502, 1511, 1510, 3018, 2007, 2014, 2513, 3019, 1, 2506, 2005, 4512, 1504, 4009, 3511, 4015, 1003, 1009, 2008, 4516, 2510, 2516, 3014, 3520, 502, 512, 511, 2517, 510, 516, 2018, 4021, 1007, 1015, 1014, 3021, 1513, 1520, 2019, 2522};
-// kP = -0.79, kD = -0.73, kI = 0.37
-float gains[len] = {-0.79,-0.73,0.37};
+// kP = -1.260001167, kD = -0.06000057, kI = 0
+// for rightBaseSpeed = 140 and leftBaseSpeed = 120
+float gains[len] = {-1.260001167,-0.06000057,0};
 float dgains[len] = {1,1,1};
-float tol = 0.002, step_ = 0.01;
+float tol = 0.002, step_ = 0.005;
 
 //float rightMaxSpeed = 250;
 //float leftMaxSpeed = 250;
@@ -277,16 +278,16 @@ float run()
 }
 
 void tune(){
-  gains[0] = gains[1] = 0;
   dgains[0] = dgains[1] = 1;
+  dgains[2] = 0;
   bestError = run();
-  while(dgains[0]+dgains[1]>tol){
+  while(dgains[0]+dgains[1]+dgains[2]>tol){
     for(int i=0; i<len; i++){
       gains[i] = gains[i] + dgains[i];
       error = run();
       if(error < bestError){
         bestError = error;
-        dgains[i] = dgains[i] * 1.1;
+        dgains[i] = dgains[i] * (1 + step_);
       }
       else{
         gains[i] = gains[i] - 2*dgains[i];
@@ -317,7 +318,6 @@ void tune(){
 }
 
 void setup() {
-  // put your setup code here, to run once:
   pinMode(rightMotor1, OUTPUT);
   pinMode(rightMotor2, OUTPUT);
   pinMode(rightMotorEn, OUTPUT);
@@ -337,13 +337,13 @@ void setup() {
   delay(100);
   digitalWrite(led, LOW);
   BTserial.println("tuning over");
-  BTserial.print(gains[0]);  
-  BTserial.print("\t");
-  BTserial.print(gains[1]);
-  BTserial.print("\t");
-  BTserial.print(gains[2]);
-  BTserial.print("\t");
-  BTserial.print(bestError);
+  BTserial.print(gains[0], 8);  
+  BTserial.print("\t\t\t\t");
+  BTserial.print(gains[1], 8);
+  BTserial.print("\t\t\t\t");
+  BTserial.print(gains[2], 8);
+  BTserial.print("\t\t\t\t");
+  BTserial.print(bestError, 8);
   BTserial.println(";");
   digitalWrite(rightMotor1, HIGH);
   digitalWrite(rightMotor2, LOW);
@@ -356,7 +356,6 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   error = run(); 
 //  BTserial.print(error);
 //  BTserial.println(";"); 
